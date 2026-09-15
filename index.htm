@@ -598,7 +598,7 @@
           <td>${fmtDate(c.expiryDate)}</td>
           <td>${statusBadge}</td>
           <td class="actions-cell">
-            <button class="btn btn-outline btn-small" data-action="copy" data-id="${c.id}">📋 Copy</button>
+            <button class="btn btn-outline btn-small" data-action="copy" data-id="${c.id}">📋 Copy Message</button>
             <button class="btn btn-green btn-small" data-action="redeem" data-id="${c.id}" ${c.status !== 'active' ? 'disabled' : ''}>✅ Redeem</button>
             <button class="btn btn-danger btn-small" data-action="delete" data-id="${c.id}">🗑</button>
           </td>
@@ -693,7 +693,7 @@
     if(!entry) return;
 
     if(action === 'copy'){
-      copyCode(entry.code);
+      copyCode(entry);
     } else if(action === 'redeem'){
       if(entry.status !== 'active') return;
       if(!confirm(`Mark code ${entry.code} as redeemed? This is a one-time action and cannot be undone.`)) return;
@@ -711,12 +711,23 @@
     }
   });
 
-  function copyCode(code){
-    const done = () => showToast('📋 Copied ' + code + ' to clipboard');
+  function copyCode(entry){
+    const message =
+`🎁 You've Earned a Loyalty Reward!
+Thank you for shopping with Gaming Pasal ❤️
+
+🏷️ Your Code: ${entry.code}
+💰 Enjoy ${entry.discountPercent}% OFF on your next eligible purchase!
+⏳ Valid until: ${fmtDate(entry.expiryDate)}
+
+⭐ Please leave us a review on our page or post.
+Your feedback means a lot!`;
+
+    const done = () => showToast('📋 Message copied — ready to paste');
     if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(code).then(done).catch(() => fallbackCopy(code, done));
+      navigator.clipboard.writeText(message).then(done).catch(() => fallbackCopy(message, done));
     } else {
-      fallbackCopy(code, done);
+      fallbackCopy(message, done);
     }
   }
   function fallbackCopy(text, cb){
