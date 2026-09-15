@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gaming Pasal — Loyalty Program</title>
+<style>
+  :root{
+    --bg: #0b0e14;
+    --bg-alt: #10151f;
+    --card: #141a26;
+    --card-hover: #182035;
+    --border: #232b3d;
+    --text: #e8ecf5;
+    --text-dim: #8992a8;
+    --accent: #7c5cff;
+    --accent-2: #00e5a0;
+    --accent-3: #ff4d8d;
+    --warn: #ffb020;
+    --danger: #ff5566;
+    --radius: 14px;
+    --shadow: 0 8px 24px rgba(0,0,0,0.35);
+  }
+  *{ box-sizing: border-box; }
+  body{
+    margin:0;
+    font-family: 'Segoe UI', system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+    background:
+      radial-gradient(circle at 15% 0%, rgba(124,92,255,0.18), transparent 40%),
+      radial-gradient(circle at 85% 10%, rgba(0,229,160,0.12), transparent 40%),
+      var(--bg);
+    color: var(--text);
+    min-height:100vh;
+    padding-bottom: 60px;
+  }
+  header.top{
+    padding: 28px 20px 18px;
+    text-align:center;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(124,92,255,0.08), transparent);
+  }
+  header.top .logo{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+  }
+  header.top .logo span.mark{
+    background: linear-gradient(135deg, var(--accent), var(--accent-3));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  header.top .tag{
+    color: var(--text-dim);
+    font-size: 13px;
+    margin-top: 6px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  .wrap{
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 24px 18px 0;
+  }
+  /* Stats */
+  .stats-grid{
+    display:grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 14px;
+    margin-bottom: 26px;
+  }
+  .stat-card{
+    background: var(--card);
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow);
+  }
+  .stat-card .label{
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+  .stat-card .value{
+    font-size: 22px;
+    font-weight: 800;
+  }
+  .stat-card.accent-purple .value{ color: var(--accent); }
+  .stat-card.accent-green .value{ color: var(--accent-2); }
+  .stat-card.accent-pink .value{ color: var(--accent-3); }
+  .stat-card.accent-warn .value{ color: var(--warn); }
+
+  /* Panels */
+  .panel{
+    background: var(--card);
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 22px;
+    box-shadow: var(--shadow);
+  }
+  .panel h2{
+    margin:0 0 16px;
+    font-size: 16px;
+    display:flex;
+    align-items:center;
+    gap: 8px;
+  }
+  .panel h2 .dot{
+    width:8px; height:8px; border-radius:50%;
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+  }
+
+  form.gen-form{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+  .field{ display:flex; flex-direction:column; gap:6px; }
+  .field label{ font-size: 12px; color: var(--text-dim); }
+  .field input, .field select{
+    background: var(--bg-alt);
+    border:1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 14px;
+    outline:none;
+    transition: border-color 0.15s;
+  }
+  .field input:focus, .field select:focus{
+    border-color: var(--accent);
+  }
+  .hint{ font-size: 11px; color: var(--text-dim); }
+
+  .btn{
+    border:none;
+    cursor:pointer;
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 700;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    transition: transform 0.1s, opacity 0.15s;
+  }
+  .btn:active{ transform: scale(0.97); }
+  .btn-primary{ background: linear-gradient(135deg, var(--accent), #5a3fe0); color:white; }
+  .btn-outline{ background: transparent; border:1px solid var(--border); color: var(--text); }
+  .btn-green{ background: var(--accent-2); color: #052; }
+  .btn-danger{ background: rgba(255,85,102,0.15); color: var(--danger); border:1px solid rgba(255,85,102,0.4); }
+  .btn-small{ padding: 6px 10px; font-size: 12px; border-radius: 8px; }
+  .btn:disabled{ opacity: 0.4; cursor:not-allowed; }
+
+  .form-actions{
+    grid-column: 1 / -1;
+    display:flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 4px;
+  }
+
+  /* Toolbar */
+  .toolbar{
+    display:flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items:center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .toolbar .filters{
+    display:flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    flex:1;
+  }
+  .toolbar input[type="text"]{
+    background: var(--bg-alt);
+    border:1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 9px 12px;
+    font-size: 13px;
+    min-width: 220px;
+    outline:none;
+  }
+  .toolbar select{
+    background: var(--bg-alt);
+    border:1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 9px 12px;
+    font-size: 13px;
+    outline:none;
+  }
+
+  /* Table */
+  .table-wrap{ overflow-x:auto; }
+  table{
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 980px;
+  }
+  thead th{
+    text-align:left;
+    padding: 10px 12px;
+    color: var(--text-dim);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  tbody td{
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+  tbody tr:hover{ background: var(--card-hover); }
+
+  .code-pill{
+    font-family: 'Consolas', monospace;
+    background: rgba(124,92,255,0.12);
+    border: 1px solid rgba(124,92,255,0.35);
+    color: #b9a6ff;
+    padding: 4px 9px;
+    border-radius: 8px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .badge{
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    display:inline-block;
+  }
+  .badge-active{ background: rgba(0,229,160,0.15); color: var(--accent-2); border:1px solid rgba(0,229,160,0.4); }
+  .badge-redeemed{ background: rgba(124,92,255,0.15); color: #b9a6ff; border:1px solid rgba(124,92,255,0.4); }
+  .badge-expired{ background: rgba(255,85,102,0.15); color: var(--danger); border:1px solid rgba(255,85,102,0.4); }
+
+  .tier-badge{
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .tier-Bronze{ background: rgba(205,127,50,0.18); color: #d38b46; }
+  .tier-Silver{ background: rgba(192,192,205,0.18); color: #c9cad6; }
+  .tier-Gold{ background: rgba(255,196,0,0.18); color: #ffcf40; }
+  .tier-Platinum{ background: rgba(0,229,160,0.18); color: var(--accent-2); }
+
+  .actions-cell{ display:flex; gap:6px; }
+
+  .empty-state{
+    text-align:center;
+    padding: 50px 20px;
+    color: var(--text-dim);
+  }
+  .empty-state .big{ font-size: 40px; margin-bottom: 8px; }
+
+  .toast{
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--card);
+    border:1px solid var(--accent);
+    color: var(--text);
+    padding: 12px 20px;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    font-size: 13px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s ease;
+    z-index: 999;
+  }
+  .toast.show{
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  footer{
+    text-align:center;
+    color: var(--text-dim);
+    font-size: 12px;
+    margin-top: 30px;
+    padding: 0 20px;
+  }
+
+  /* Responsive */
+  @media (max-width: 1000px){
+    .stats-grid{ grid-template-columns: repeat(3, 1fr); }
+    form.gen-form{ grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 600px){
+    .stats-grid{ grid-template-columns: repeat(2, 1fr); }
+    form.gen-form{ grid-template-columns: 1fr; }
+    header.top .logo{ font-size: 21px; }
+    .toolbar{ flex-direction:column; align-items:stretch; }
+    .toolbar input[type="text"]{ min-width: 0; width:100%; }
+    .panel{ padding: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="logo"><span>🎮</span><span class="mark">Gaming Pasal</span></div>
+  <div class="tag">Loyalty &amp; Discount Code Program</div>
+</header>
+
+<div class="wrap">
+
+  <!-- Dashboard Stats -->
+  <div class="stats-grid" id="statsGrid"></div>
+
+  <!-- Generate Form -->
+  <div class="panel">
+    <h2><span class="dot"></span>Generate Loyalty Code</h2>
+    <form class="gen-form" id="genForm">
+      <div class="field">
+        <label>Customer Name</label>
+        <input type="text" id="custName" placeholder="e.g. Suresh Thapa" required>
+      </div>
+      <div class="field">
+        <label>Customer ID / Phone</label>
+        <input type="text" id="custId" placeholder="e.g. 98XXXXXXXX" required>
+      </div>
+      <div class="field">
+        <label>Purchase Amount (Rs.)</label>
+        <input type="number" id="purchaseAmt" placeholder="e.g. 5000" min="0" step="1" required>
+      </div>
+      <div class="field">
+        <label>Discount % <span class="hint">(auto, capped 5%)</span></label>
+        <input type="text" id="discountPreview" readonly placeholder="—">
+      </div>
+      <div class="field">
+        <label>Loyalty Points <span class="hint">(auto)</span></label>
+        <input type="text" id="pointsPreview" readonly placeholder="—">
+      </div>
+      <div class="field">
+        <label>Valid From</label>
+        <input type="date" id="issueDate" required>
+      </div>
+      <div class="field">
+        <label>Expiry Date</label>
+        <input type="date" id="expiryDate" required>
+      </div>
+      <div class="form-actions">
+        <button type="reset" class="btn btn-outline">Clear</button>
+        <button type="submit" class="btn btn-primary">✨ Generate Code</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Codes Table -->
+  <div class="panel">
+    <h2><span class="dot"></span>Loyalty Codes</h2>
+    <div class="toolbar">
+      <div class="filters">
+        <input type="text" id="searchBox" placeholder="Search code, customer name or ID...">
+        <select id="statusFilter">
+          <option value="all">All Statuses</option>
+          <option value="active">Active</option>
+          <option value="redeemed">Redeemed</option>
+          <option value="expired">Expired</option>
+        </select>
+        <select id="tierFilter">
+          <option value="all">All Tiers</option>
+          <option value="Bronze">Bronze</option>
+          <option value="Silver">Silver</option>
+          <option value="Gold">Gold</option>
+          <option value="Platinum">Platinum</option>
+        </select>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-outline btn-small" id="importBtn">⬆ Import CSV</button>
+        <input type="file" id="importFile" accept=".csv,text/csv" style="display:none;">
+        <button class="btn btn-green btn-small" id="exportBtn">⬇ Export CSV</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Customer</th>
+            <th>ID</th>
+            <th>Purchase</th>
+            <th>Discount</th>
+            <th>Points</th>
+            <th>Tier</th>
+            <th>Expiry</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="codesBody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" style="display:none;">
+        <div class="big">🕹️</div>
+        <div>No loyalty codes yet. Generate one above to get started.</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>Gaming Pasal Loyalty Program • Data stored locally in this browser</footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  const STORAGE_KEY = 'gamingPasalLoyaltyData';
+  let codes = [];
+
+  // ---------- Utilities ----------
+  function todayISO(){
+    return new Date().toISOString().slice(0,10);
+  }
+  function addDaysISO(days){
+    const d = new Date();
+    d.setDate(d.getDate() + days);
+    return d.toISOString().slice(0,10);
+  }
+  function fmtDate(iso){
+    if(!iso) return '—';
+    const d = new Date(iso + 'T00:00:00');
+    return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+  }
+  function fmtMoney(n){
+    return 'Rs. ' + Number(n).toLocaleString('en-IN');
+  }
+  function uid(){
+    return 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,8);
+  }
+
+  function getDiscountPercent(amount){
+    amount = Number(amount) || 0;
+    if(amount >= 20000) return 5;
+    if(amount >= 10000) return 4;
+    if(amount >= 5000) return 3;
+    if(amount >= 3000) return 2;
+    if(amount >= 1000) return 1;
+    return 0;
+  }
+  function getPoints(amount){
+    return Math.floor((Number(amount)||0) / 100);
+  }
+  function getTierFromPoints(points){
+    if(points >= 3000) return 'Platinum';
+    if(points >= 1500) return 'Gold';
+    if(points >= 500) return 'Silver';
+    return 'Bronze';
+  }
+
+  function generateUniqueCode(){
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no confusing chars
+    let code;
+    do{
+      let suffix = '';
+      for(let i=0;i<6;i++){
+        suffix += chars[Math.floor(Math.random()*chars.length)];
+      }
+      code = 'GP' + suffix;
+    } while(codes.some(c => c.code === code));
+    return code;
+  }
+
+  // ---------- Storage ----------
+  function loadData(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      codes = raw ? JSON.parse(raw) : [];
+    }catch(e){
+      console.error('Failed to load loyalty data', e);
+      codes = [];
+    }
+  }
+  function saveData(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(codes));
+    }catch(e){
+      console.error('Failed to save loyalty data', e);
+      showToast('⚠ Could not save data (storage full?)');
+    }
+  }
+
+  // ---------- Derived state ----------
+  function refreshExpiryStatuses(){
+    const today = todayISO();
+    let changed = false;
+    codes.forEach(c => {
+      if(c.status === 'active' && c.expiryDate < today){
+        c.status = 'expired';
+        changed = true;
+      }
+    });
+    if(changed) saveData();
+  }
+
+  function customerLifetimePoints(customerId){
+    return codes
+      .filter(c => c.customerId === customerId)
+      .reduce((sum,c) => sum + (c.points||0), 0);
+  }
+
+  // ---------- Rendering ----------
+  function renderStats(){
+    const total = codes.length;
+    const active = codes.filter(c=>c.status==='active').length;
+    const redeemed = codes.filter(c=>c.status==='redeemed').length;
+    const expired = codes.filter(c=>c.status==='expired').length;
+    const totalValue = codes.reduce((s,c)=>s + (Number(c.purchaseAmount)||0), 0);
+    const uniqueCustomers = new Set(codes.map(c=>c.customerId)).size;
+
+    const stats = [
+      { label:'Total Codes', value: total, cls:'accent-purple' },
+      { label:'Active', value: active, cls:'accent-green' },
+      { label:'Redeemed', value: redeemed, cls:'accent-pink' },
+      { label:'Expired', value: expired, cls:'accent-warn' },
+      { label:'Total Purchase Value', value: fmtMoney(totalValue), cls:'accent-purple' },
+      { label:'Unique Customers', value: uniqueCustomers, cls:'accent-green' },
+    ];
+
+    document.getElementById('statsGrid').innerHTML = stats.map(s => `
+      <div class="stat-card ${s.cls}">
+        <div class="label">${s.label}</div>
+        <div class="value">${s.value}</div>
+      </div>
+    `).join('');
+  }
+
+  function getFilteredCodes(){
+    const search = document.getElementById('searchBox').value.trim().toLowerCase();
+    const statusF = document.getElementById('statusFilter').value;
+    const tierF = document.getElementById('tierFilter').value;
+
+    return codes
+      .slice()
+      .sort((a,b) => (b.issueDate||'').localeCompare(a.issueDate||'') || b.createdAt - a.createdAt)
+      .filter(c => {
+        const tier = getTierFromPoints(customerLifetimePoints(c.customerId));
+        if(statusF !== 'all' && c.status !== statusF) return false;
+        if(tierF !== 'all' && tier !== tierF) return false;
+        if(search){
+          const hay = (c.code + ' ' + c.customerName + ' ' + c.customerId).toLowerCase();
+          if(!hay.includes(search)) return false;
+        }
+        return true;
+      });
+  }
+
+  function renderTable(){
+    const list = getFilteredCodes();
+    const tbody = document.getElementById('codesBody');
+    const emptyState = document.getElementById('emptyState');
+
+    if(list.length === 0){
+      tbody.innerHTML = '';
+      emptyState.style.display = 'block';
+      return;
+    }
+    emptyState.style.display = 'none';
+
+    tbody.innerHTML = list.map(c => {
+      const tier = getTierFromPoints(customerLifetimePoints(c.customerId));
+      const statusBadge = c.status === 'active'
+        ? '<span class="badge badge-active">Active</span>'
+        : c.status === 'redeemed'
+          ? '<span class="badge badge-redeemed">Redeemed</span>'
+          : '<span class="badge badge-expired">Expired</span>';
+
+      return `
+        <tr>
+          <td><span class="code-pill">${c.code}</span></td>
+          <td>${escapeHtml(c.customerName)}</td>
+          <td>${escapeHtml(c.customerId)}</td>
+          <td>${fmtMoney(c.purchaseAmount)}</td>
+          <td>${c.discountPercent}%</td>
+          <td>${c.points} pts</td>
+          <td><span class="tier-badge tier-${tier}">${tier}</span></td>
+          <td>${fmtDate(c.expiryDate)}</td>
+          <td>${statusBadge}</td>
+          <td class="actions-cell">
+            <button class="btn btn-outline btn-small" data-action="copy" data-id="${c.id}">📋 Copy</button>
+            <button class="btn btn-green btn-small" data-action="redeem" data-id="${c.id}" ${c.status !== 'active' ? 'disabled' : ''}>✅ Redeem</button>
+            <button class="btn btn-danger btn-small" data-action="delete" data-id="${c.id}">🗑</button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str == null ? '' : String(str);
+    return div.innerHTML;
+  }
+
+  function renderAll(){
+    refreshExpiryStatuses();
+    renderStats();
+    renderTable();
+  }
+
+  // ---------- Toast ----------
+  let toastTimer;
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  // ---------- Form live preview ----------
+  function updatePreview(){
+    const amt = Number(document.getElementById('purchaseAmt').value) || 0;
+    const disc = getDiscountPercent(amt);
+    const pts = getPoints(amt);
+    document.getElementById('discountPreview').value = amt > 0 ? disc + '%' : '';
+    document.getElementById('pointsPreview').value = amt > 0 ? pts + ' pts' : '';
+  }
+
+  // ---------- Event handlers ----------
+  document.getElementById('purchaseAmt').addEventListener('input', updatePreview);
+
+  document.getElementById('genForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const custName = document.getElementById('custName').value.trim();
+    const custId = document.getElementById('custId').value.trim();
+    const purchaseAmount = Number(document.getElementById('purchaseAmt').value);
+    const issueDate = document.getElementById('issueDate').value || todayISO();
+    const expiryDate = document.getElementById('expiryDate').value;
+
+    if(!custName || !custId || !purchaseAmount || !expiryDate){
+      showToast('⚠ Please fill all required fields');
+      return;
+    }
+    if(expiryDate < issueDate){
+      showToast('⚠ Expiry date must be after valid-from date');
+      return;
+    }
+
+    const entry = {
+      id: uid(),
+      code: generateUniqueCode(),
+      customerName: custName,
+      customerId: custId,
+      purchaseAmount: purchaseAmount,
+      discountPercent: getDiscountPercent(purchaseAmount),
+      points: getPoints(purchaseAmount),
+      issueDate: issueDate,
+      expiryDate: expiryDate,
+      status: 'active',
+      redeemedDate: null,
+      createdAt: Date.now()
+    };
+
+    codes.push(entry);
+    saveData();
+    renderAll();
+    showToast('✅ Code ' + entry.code + ' generated');
+
+    this.reset();
+    document.getElementById('issueDate').value = todayISO();
+    document.getElementById('expiryDate').value = addDaysISO(7);
+    updatePreview();
+  });
+
+  document.getElementById('codesBody').addEventListener('click', function(e){
+    const btn = e.target.closest('button[data-action]');
+    if(!btn) return;
+    const id = btn.getAttribute('data-id');
+    const action = btn.getAttribute('data-action');
+    const entry = codes.find(c => c.id === id);
+    if(!entry) return;
+
+    if(action === 'copy'){
+      copyCode(entry.code);
+    } else if(action === 'redeem'){
+      if(entry.status !== 'active') return;
+      if(!confirm(`Mark code ${entry.code} as redeemed? This is a one-time action and cannot be undone.`)) return;
+      entry.status = 'redeemed';
+      entry.redeemedDate = todayISO();
+      saveData();
+      renderAll();
+      showToast('✅ Code ' + entry.code + ' marked as redeemed');
+    } else if(action === 'delete'){
+      if(!confirm(`Delete code ${entry.code}? This cannot be undone.`)) return;
+      codes = codes.filter(c => c.id !== id);
+      saveData();
+      renderAll();
+      showToast('🗑 Code deleted');
+    }
+  });
+
+  function copyCode(code){
+    const done = () => showToast('📋 Copied ' + code + ' to clipboard');
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(code).then(done).catch(() => fallbackCopy(code, done));
+    } else {
+      fallbackCopy(code, done);
+    }
+  }
+  function fallbackCopy(text, cb){
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand('copy'); cb(); }catch(e){ showToast('⚠ Copy failed — copy manually: ' + text); }
+    document.body.removeChild(ta);
+  }
+
+  document.getElementById('searchBox').addEventListener('input', renderTable);
+  document.getElementById('statusFilter').addEventListener('change', renderTable);
+  document.getElementById('tierFilter').addEventListener('change', renderTable);
+
+  document.getElementById('exportBtn').addEventListener('click', function(){
+    if(codes.length === 0){
+      showToast('⚠ No data to export');
+      return;
+    }
+    const headers = ['Code','Customer Name','Customer ID','Purchase Amount','Discount %','Points','Tier','Issue Date','Expiry Date','Status','Redeemed Date'];
+    const rows = codes.map(c => [
+      c.code,
+      c.customerName,
+      c.customerId,
+      c.purchaseAmount,
+      c.discountPercent,
+      c.points,
+      getTierFromPoints(customerLifetimePoints(c.customerId)),
+      c.issueDate,
+      c.expiryDate,
+      c.status,
+      c.redeemedDate || ''
+    ]);
+    const csv = [headers, ...rows]
+      .map(row => row.map(csvEscape).join(','))
+      .join('\r\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `gaming-pasal-loyalty-${todayISO()}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('⬇ CSV exported');
+  });
+
+  // ---------- Import ----------
+  document.getElementById('importBtn').addEventListener('click', function(){
+    document.getElementById('importFile').click();
+  });
+
+  document.getElementById('importFile').addEventListener('change', function(e){
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt){
+      try{
+        importFromCSV(evt.target.result);
+      }catch(err){
+        console.error(err);
+        showToast('⚠ Import failed — check the file format');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = ''; // allow re-selecting the same file later
+  });
+
+  function parseCSV(text){
+    // Handles quoted fields, commas and \r\n / \n line endings
+    const rows = [];
+    let row = [];
+    let field = '';
+    let inQuotes = false;
+    text = text.replace(/\r\n/g, '\n');
+    for(let i=0; i<text.length; i++){
+      const ch = text[i];
+      if(inQuotes){
+        if(ch === '"'){
+          if(text[i+1] === '"'){ field += '"'; i++; }
+          else { inQuotes = false; }
+        } else {
+          field += ch;
+        }
+      } else {
+        if(ch === '"'){ inQuotes = true; }
+        else if(ch === ','){ row.push(field); field=''; }
+        else if(ch === '\n'){ row.push(field); rows.push(row); row=[]; field=''; }
+        else { field += ch; }
+      }
+    }
+    if(field.length || row.length){ row.push(field); rows.push(row); }
+    return rows.filter(r => r.length > 1 || (r.length===1 && r[0] !== ''));
+  }
+
+  function importFromCSV(text){
+    const rows = parseCSV(text);
+    if(rows.length < 2){
+      showToast('⚠ No data found in file');
+      return;
+    }
+    const headers = rows[0].map(h => h.trim().toLowerCase());
+    const col = name => headers.indexOf(name);
+
+    const idx = {
+      code: col('code'),
+      customerName: col('customer name'),
+      customerId: col('customer id'),
+      purchaseAmount: col('purchase amount'),
+      discountPercent: col('discount %'),
+      points: col('points'),
+      issueDate: col('issue date'),
+      expiryDate: col('expiry date'),
+      status: col('status'),
+      redeemedDate: col('redeemed date')
+    };
+
+    if(idx.code === -1 || idx.customerName === -1 || idx.purchaseAmount === -1){
+      showToast('⚠ CSV is missing required columns');
+      return;
+    }
+
+    let added = 0, skipped = 0;
+    for(let r = 1; r < rows.length; r++){
+      const cells = rows[r];
+      if(!cells || cells.length === 0) continue;
+      const code = (cells[idx.code] || '').trim();
+      if(!code) continue;
+
+      if(codes.some(c => c.code === code)){
+        skipped++;
+        continue;
+      }
+
+      const purchaseAmount = Number(cells[idx.purchaseAmount]) || 0;
+      const status = (idx.status !== -1 ? cells[idx.status] : 'active').trim().toLowerCase();
+
+      codes.push({
+        id: uid(),
+        code: code,
+        customerName: idx.customerName !== -1 ? cells[idx.customerName] : '',
+        customerId: idx.customerId !== -1 ? cells[idx.customerId] : '',
+        purchaseAmount: purchaseAmount,
+        discountPercent: idx.discountPercent !== -1 && cells[idx.discountPercent] !== ''
+          ? Number(String(cells[idx.discountPercent]).replace('%','')) : getDiscountPercent(purchaseAmount),
+        points: idx.points !== -1 && cells[idx.points] !== ''
+          ? Number(String(cells[idx.points]).replace(/[^\d.-]/g,'')) : getPoints(purchaseAmount),
+        issueDate: idx.issueDate !== -1 && cells[idx.issueDate] ? cells[idx.issueDate] : todayISO(),
+        expiryDate: idx.expiryDate !== -1 && cells[idx.expiryDate] ? cells[idx.expiryDate] : addDaysISO(7),
+        status: ['active','redeemed','expired'].includes(status) ? status : 'active',
+        redeemedDate: idx.redeemedDate !== -1 && cells[idx.redeemedDate] ? cells[idx.redeemedDate] : null,
+        createdAt: Date.now()
+      });
+      added++;
+    }
+
+    saveData();
+    renderAll();
+    showToast(`⬆ Imported ${added} code(s)${skipped ? `, skipped ${skipped} duplicate(s)` : ''}`);
+  }
+
+  function csvEscape(val){
+    const s = String(val == null ? '' : val);
+    if(/[",\r\n]/.test(s)){
+      return '"' + s.replace(/"/g,'""') + '"';
+    }
+    return s;
+  }
+
+  // ---------- Init ----------
+  document.getElementById('issueDate').value = todayISO();
+  document.getElementById('expiryDate').value = addDaysISO(7);
+
+  loadData();
+  renderAll();
+})();
+</script>
+
+</body>
+</html>
